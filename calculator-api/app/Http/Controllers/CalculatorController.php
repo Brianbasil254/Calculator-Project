@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -14,58 +15,40 @@ class CalculatorController extends Controller
             'operation' => 'required|in:add,subtract,multiply,divide',
         ]);
 
-        $a = $data['a'];
-        $b = $data['b'];
-        $operation = $data['operation'];
-
-        switch ($operation) {
+        switch ($data['operation']) {
             case 'add':
-                $result = $a + $b;
+                $result = $data['a'] + $data['b'];
                 break;
             case 'subtract':
-                $result = $a - $b;
+                $result = $data['a'] - $data['b'];
                 break;
             case 'multiply':
-                $result = $a * $b;
+                $result = $data['a'] * $data['b'];
                 break;
             case 'divide':
-                if ($b == 0) {
-                    return response()->json(['error' => 'Invalid operation'], 400);
-                }
-                $result = $a / $b;
+                if ($data['b'] == 0) return response()->json(['error' => 'Division by zero'], 400);
+                $result = $data['a'] / $data['b'];
                 break;
-            default:
-                return response()->json(['error' => 'Invalid operation'], 400);
         }
 
-        $calculation = Calculation::create([
-            'a' => $a,
-            'b' => $b,
-            'operation' => $operation,
-            'result' => $result,
-        ]);
+        $calc = Calculation::create([
+    'operand1' => $data['a'],   // ✅ Correct name
+    'operand2' => $data['b'],   // ✅ Correct name
+    'operation' => $data['operation'],
+    'result' => $result,
+]);
 
-        return response()->json([
-            'id' => $calculation->id,
-            'result' => $calculation->result,
-        ]);
+        if (!$calc) return response()->json(['error' => 'Calculation failed'], 500);
+
+        return response()->json($calc, 201);
     }
 
     public function show($id)
     {
-        $calculation = Calculation::find($id);
+        $calc = Calculation::find($id);
 
-        if (!$calculation) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
+        if (!$calc) return response()->json(['error' => 'Not found'], 404);
 
-        return response()->json([
-            'id' => $calculation->id,
-            'a' => $calculation->a,
-            'b' => $calculation->b,
-            'operation' => $calculation->operation,
-            'result' => $calculation->result,
-            'created_at' => $calculation->created_at->toIso8601String(),
-        ]);
+        return response()->json($calc);
     }
 }

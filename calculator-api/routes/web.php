@@ -3,5 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json(['message' => 'Welcome to the Calculator API']);
+});
+Route::get('/health', function () {
+    return response()->json(['status' => 'OK']);
 });
